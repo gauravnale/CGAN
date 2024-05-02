@@ -17,6 +17,8 @@ class CGAN:
         self.discriminator = self.build_discriminator()
         self.combined = self.build_combined()
 
+        self.generator.compile(loss='binary_crossentropy', optimizer=Adam())
+
         self.discriminator.compile(loss='binary_crossentropy', optimizer=Adam(), metrics=['accuracy'])
         
         # Compile combined model
@@ -133,13 +135,16 @@ synthetic_samples = generate_synthetic_samples(cgan, num_samples)
 # Inverse transform the synthetic data to original scale
 synthetic_samples_original_scale = scaler.inverse_transform(np.hstack((synthetic_samples, np.zeros((num_samples, 1)))))
 
-# Create a DataFrame for the synthetic data
-synthetic_df = pd.DataFrame(data=synthetic_samples_original_scale, columns=processed_data.columns[:-1])
 
 print("Shape of synthetic samples:", synthetic_samples_original_scale.shape)
 print("Contents of synthetic samples:", synthetic_samples_original_scale)
 
+# Create a DataFrame for the synthetic data
+synthetic_df = pd.DataFrame(data=synthetic_samples_original_scale, columns=processed_data.columns)
 
 # Print synthetic data
-print("Synthetic Data:")
-print(synthetic_df)
+# print("Synthetic Data:")
+# print(synthetic_df)
+
+# Save synthetic data to an Excel file
+synthetic_df.to_excel("synthetic_data.xlsx", index=False)
