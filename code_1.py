@@ -131,20 +131,47 @@ def generate_synthetic_samples(cgan, num_samples):
 num_samples = 10
 synthetic_samples = generate_synthetic_samples(cgan, num_samples)
 
+def convert_numerical_to_words(numerical_output):
+    # Map numerical values to words or descriptions
+    marital_status_map = {0: "Single", 1: "Married", 2: "Divorced", 3: "Widowed"}
+    status_map = {0: "Client.Inactive", 1: "Client.Active"}
 
-# Inverse transform the synthetic data to original scale
-synthetic_samples_original_scale = scaler.inverse_transform(np.hstack((synthetic_samples, np.zeros((num_samples, 1)))))
+    # Convert numerical values to words
+    marital_status_word = marital_status_map.get(numerical_output["Marital Status"], "Unknown")
+    status_word = status_map.get(numerical_output["Status"], "Unknown")
 
+    # Format numerical values
+    dependents = str(numerical_output["Dependents"])
+    state = numerical_output["State"]
+    profession = numerical_output["Profession"]
+    net_worth = "${:,.2f}".format(numerical_output["Net Worth"])
+    financial_goals = numerical_output["Financial Goals"]
 
-print("Shape of synthetic samples:", synthetic_samples_original_scale.shape)
-print("Contents of synthetic samples:", synthetic_samples_original_scale)
+    return {
+        "Marital Status": marital_status_word,
+        "Dependents": dependents,
+        "State": state,
+        "Profession": profession,
+        "Net Worth": net_worth,
+        "Financial Goals": financial_goals,
+        "Status": status_word
+    }
 
-# Create a DataFrame for the synthetic data
-synthetic_df = pd.DataFrame(data=synthetic_samples_original_scale, columns=processed_data.columns)
+synthetic_data_words = []
+for synthetic_sample in synthetic_samples:
+    numerical_output = {
+        "Marital Status": synthetic_sample[0],     
+        "Dependents": synthetic_sample[1],         
+        "State": "North Carolina",                 
+        "Profession": "Entrepreneur",              
+        "Net Worth": synthetic_sample[2],          
+        "Financial Goals": "Save for children's education, retire at 60",  
+        "Status": 1                                
+    }
+    synthetic_data_words.append(convert_numerical_to_words(numerical_output))
 
-# Print synthetic data
-# print("Synthetic Data:")
-# print(synthetic_df)
+# Create DataFrame for synthetic data
+synthetic_df = pd.DataFrame(data=[synthetic_data_words])
 
-# Save synthetic data to an Excel file
-synthetic_df.to_excel("synthetic_data.xlsx", index=False)
+# Save synthetic data to Excel
+synthetic_df.to_excel("synthetic_data_words.xlsx", index=False)
